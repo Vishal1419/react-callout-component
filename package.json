@@ -17,6 +17,13 @@
   "author": {
     "name": "Vishal Sherathiya"
   },
+  "keywords": [
+    "react-callout",
+    "callout",
+    "tooltip",
+    "react-tooltip",
+    "callout-component"
+  ],
   "license": "ISC",
   "dependencies": {
     "react": "^16.4.2",
