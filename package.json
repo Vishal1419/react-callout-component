@@ -1,6 +1,6 @@
 {
   "name": "@vishal1419/react-callout",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "A callout component for React-16.3+",
   "main": "dist/index.js",
   "repository": {
