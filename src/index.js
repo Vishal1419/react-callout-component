@@ -37,8 +37,12 @@ const Callout = props => (
         [orientationMapper[props.side] === 'horizontal' ? 'top' : 'left']:
           props.parentElement
             ? orientationMapper[props.side] === 'horizontal'
-              ? `${props.parentElement.getBoundingClientRect().top + (props.parentElement.clientHeight / 2)}px`
-              : `${props.parentElement.getBoundingClientRect().left + (props.parentElement.clientWidth / 2)}px`
+              ? props.parentElement.getBoundingClientRect().top + (props.parentElement.clientHeight / 2) > 0
+                ? `${props.parentElement.getBoundingClientRect().top + (props.parentElement.clientHeight / 2)}px`
+                : 0
+              : props.parentElement.getBoundingClientRect().left + (props.parentElement.clientWidth / 2)
+                ? `${props.parentElement.getBoundingClientRect().left + (props.parentElement.clientWidth / 2)}px`
+                : 0
             : 0,
         transform: orientationMapper[props.side] === 'horizontal'
           ? `translate(${props.side === 'left' ? '-100%' : 0}, -50%)`
@@ -47,11 +51,19 @@ const Callout = props => (
             props.parentElement
               ? orientationMapper[props.side] === 'horizontal'
                 ? props.side === 'left'
-                  ? `${props.parentElement.getBoundingClientRect().left - props.distanceFromParent - (props.arrowSize)}px`
-                  : `${props.parentElement.getBoundingClientRect().right + props.distanceFromParent + (props.arrowSize)}px`
+                  ? props.parentElement.getBoundingClientRect().left - props.distanceFromParent - (props.arrowSize) > 0
+                    ? `${props.parentElement.getBoundingClientRect().left - props.distanceFromParent - (props.arrowSize)}px`
+                    : 0
+                  : props.parentElement.getBoundingClientRect().right + props.distanceFromParent + (props.arrowSize) > 0
+                    ? `${props.parentElement.getBoundingClientRect().right + props.distanceFromParent + (props.arrowSize)}px`
+                    : 0
                 : props.side === 'top'
-                  ? `${props.parentElement.getBoundingClientRect().top - props.distanceFromParent - props.arrowSize}px`
-                  : `${props.parentElement.getBoundingClientRect().bottom + props.distanceFromParent + (props.arrowSize)}px`
+                  ? props.parentElement.getBoundingClientRect().top - props.distanceFromParent - props.arrowSize > 0
+                    ? `${props.parentElement.getBoundingClientRect().top - props.distanceFromParent - props.arrowSize}px`
+                    : 0
+                  : props.parentElement.getBoundingClientRect().bottom + props.distanceFromParent + (props.arrowSize) > 0
+                    ? `${props.parentElement.getBoundingClientRect().bottom + props.distanceFromParent + (props.arrowSize)}px`
+                    : 0
               : 0,
         
       }}
