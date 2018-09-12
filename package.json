@@ -28,6 +28,7 @@
   "dependencies": {
     "react": "^16.4.2",
     "react-dom": "^16.4.2",
+    "react-sizeme": "^2.5.2",
     "webpack": "^4.16.5"
   },
   "devDependencies": {

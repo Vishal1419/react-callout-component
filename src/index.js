@@ -1,5 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
+import sizeMe from 'react-sizeme';
 
 import './main.css';
 import Portal from './Portal';
@@ -37,12 +38,12 @@ const Callout = props => (
         [orientationMapper[props.side] === 'horizontal' ? 'top' : 'left']:
           props.parentElement
             ? orientationMapper[props.side] === 'horizontal'
-              ? props.parentElement.getBoundingClientRect().top + (props.parentElement.clientHeight / 2) > 0
+              ? props.parentElement.getBoundingClientRect().top + (props.parentElement.clientHeight / 2) - (props.size.bounds.height / 2) > 0
                 ? `${props.parentElement.getBoundingClientRect().top + (props.parentElement.clientHeight / 2)}px`
-                : 0
-              : props.parentElement.getBoundingClientRect().left + (props.parentElement.clientWidth / 2) > 0
+                : `${props.parentElement.getBoundingClientRect().top + (props.parentElement.clientHeight / 2) + (props.size.bounds.height / 2)}px`
+              : props.parentElement.getBoundingClientRect().left + (props.parentElement.clientWidth / 2) - (props.size.bounds.width / 2) > 0
                 ? `${props.parentElement.getBoundingClientRect().left + (props.parentElement.clientWidth / 2)}px`
-                : 0
+                : `${props.parentElement.getBoundingClientRect().left + (props.parentElement.clientWidth / 2) + (props.size.bounds.width / 2)}px`
             : 0,
         transform: orientationMapper[props.side] === 'horizontal'
           ? `translate(${props.side === 'left' ? '-100%' : 0}, -50%)`
@@ -104,4 +105,4 @@ Callout.defaultProps = {
   isVisible: false,
 }
 
-export default Callout;
+export default sizeMe()(Callout);
