@@ -41,10 +41,10 @@ const Callout = props => (
             ? orientationMapper[props.side] === 'horizontal'
               ? props.parentElement.getBoundingClientRect().top + (props.parentElement.clientHeight / 2) - (props.size.height / 2) > 0
                 ? `${props.parentElement.getBoundingClientRect().top + (props.parentElement.clientHeight / 2)}px`
-                : `${props.parentElement.getBoundingClientRect().top + (props.parentElement.clientHeight / 2) + (props.size.height / 2)}px`
+                : `${(props.size.height / 2) + 2}px`
               : props.parentElement.getBoundingClientRect().left + (props.parentElement.clientWidth / 2) - (props.size.width / 2) > 0
                 ? `${props.parentElement.getBoundingClientRect().left + (props.parentElement.clientWidth / 2)}px`
-                : `${props.parentElement.getBoundingClientRect().left + (props.parentElement.clientWidth / 2) + (props.size.width / 2)}px`
+                : `${(props.size.width / 2) + 2}px`
             : 0,
         transform: orientationMapper[props.side] === 'horizontal'
           ? `translate(${props.side === 'left' ? '-100%' : 0}, -50%)`
@@ -81,7 +81,14 @@ const Callout = props => (
           borderStyle: 'solid',
           borderColor: calculateBorderColor(props.side, props.color),
           [oppositeMapper[props.side]]: 0 - (4 * (props.arrowSize / 2)),
-          [orientationMapper[props.side] === 'horizontal' ? 'top' : 'left']: '50%',
+          [orientationMapper[props.side] === 'horizontal' ? 'top' : 'left']: 
+            orientationMapper[props.side] === 'horizontal' 
+              ? props.parentElement.getBoundingClientRect().top + (props.parentElement.clientHeight / 2) - (props.size.height / 2) > 0
+                ? '50%'
+                : props.parentElement.getBoundingClientRect().top + (props.parentElement.clientHeight / 2)
+              : props.parentElement.getBoundingClientRect().left + (props.parentElement.clientWidth / 2) - (props.size.width / 2) > 0
+                ? '50%'
+                : props.parentElement.getBoundingClientRect().left + (props.parentElement.clientWidth / 2),
           [orientationMapper[props.side] === 'horizontal' ? 'marginTop' : 'marginLeft']: - props.arrowSize,
         }}
       />
