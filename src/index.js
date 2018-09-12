@@ -29,6 +29,7 @@ const calculateBorderColor = (position, color) => {
 
 const Callout = props => (
   <Portal>
+    {console.log(props.size)}
     <div
       id="callout"
       className={`callout ${props.className || ''}`}
@@ -38,12 +39,12 @@ const Callout = props => (
         [orientationMapper[props.side] === 'horizontal' ? 'top' : 'left']:
           props.parentElement
             ? orientationMapper[props.side] === 'horizontal'
-              ? props.parentElement.getBoundingClientRect().top + (props.parentElement.clientHeight / 2) - (props.size.bounds.height / 2) > 0
+              ? props.parentElement.getBoundingClientRect().top + (props.parentElement.clientHeight / 2) - (props.size.height / 2) > 0
                 ? `${props.parentElement.getBoundingClientRect().top + (props.parentElement.clientHeight / 2)}px`
-                : `${props.parentElement.getBoundingClientRect().top + (props.parentElement.clientHeight / 2) + (props.size.bounds.height / 2)}px`
-              : props.parentElement.getBoundingClientRect().left + (props.parentElement.clientWidth / 2) - (props.size.bounds.width / 2) > 0
+                : `${props.parentElement.getBoundingClientRect().top + (props.parentElement.clientHeight / 2) + (props.size.height / 2)}px`
+              : props.parentElement.getBoundingClientRect().left + (props.parentElement.clientWidth / 2) - (props.size.width / 2) > 0
                 ? `${props.parentElement.getBoundingClientRect().left + (props.parentElement.clientWidth / 2)}px`
-                : `${props.parentElement.getBoundingClientRect().left + (props.parentElement.clientWidth / 2) + (props.size.bounds.width / 2)}px`
+                : `${props.parentElement.getBoundingClientRect().left + (props.parentElement.clientWidth / 2) + (props.size.width / 2)}px`
             : 0,
         transform: orientationMapper[props.side] === 'horizontal'
           ? `translate(${props.side === 'left' ? '-100%' : 0}, -50%)`
