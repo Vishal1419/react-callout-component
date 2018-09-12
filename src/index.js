@@ -40,7 +40,7 @@ const Callout = props => (
               ? props.parentElement.getBoundingClientRect().top + (props.parentElement.clientHeight / 2) > 0
                 ? `${props.parentElement.getBoundingClientRect().top + (props.parentElement.clientHeight / 2)}px`
                 : 0
-              : props.parentElement.getBoundingClientRect().left + (props.parentElement.clientWidth / 2)
+              : props.parentElement.getBoundingClientRect().left + (props.parentElement.clientWidth / 2) > 0
                 ? `${props.parentElement.getBoundingClientRect().left + (props.parentElement.clientWidth / 2)}px`
                 : 0
             : 0,
