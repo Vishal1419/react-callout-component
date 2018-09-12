@@ -29,7 +29,6 @@ const calculateBorderColor = (position, color) => {
 
 const Callout = props => (
   <Portal>
-    {console.log(props.size)}
     <div
       id="callout"
       className={`callout ${props.className || ''}`}
