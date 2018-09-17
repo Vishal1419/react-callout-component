@@ -1,6 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import sizeMe from 'react-sizeme';
+import onClickOutside from 'react-onclickoutside'
 
 import './main.css';
 import Portal from './Portal';
@@ -112,4 +113,5 @@ Callout.defaultProps = {
   isVisible: false,
 }
 
-export default sizeMe()(Callout);
+export default sizeMe()(onClickOutside(Callout));
+// one more prop exposed: handleClickOutside due to onClickOutside
