@@ -1,7 +1,6 @@
-import React from 'react';
+import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import sizeMe from 'react-sizeme';
-import onClickOutside from 'react-onclickoutside'
 
 import './main.css';
 import Portal from './Portal';
@@ -28,73 +27,99 @@ const calculateBorderColor = (position, color) => {
   return borderColors.join(' ');
 }
 
-const Callout = props => (
-  <Portal>
-    <div
-      id="callout"
-      className={`callout ${props.className || ''}`}
-      style={{
-        display: props.isVisible ? 'block' : 'none',
-        backgroundColor: props.color || 'rgba(0, 0, 0, 0.7)',
-        [orientationMapper[props.side] === 'horizontal' ? 'top' : 'left']:
-          props.parentElement
-            ? orientationMapper[props.side] === 'horizontal'
-              ? props.parentElement.getBoundingClientRect().top + (props.parentElement.clientHeight / 2) - (props.size.height / 2) > 0
-                ? `${props.parentElement.getBoundingClientRect().top + (props.parentElement.clientHeight / 2)}px`
-                : `${(props.size.height / 2) + 2}px`
-              : props.parentElement.getBoundingClientRect().left + (props.parentElement.clientWidth / 2) - (props.size.width / 2) > 0
-                ? `${props.parentElement.getBoundingClientRect().left + (props.parentElement.clientWidth / 2)}px`
-                : `${(props.size.width / 2) + 2}px`
-            : 0,
-        transform: orientationMapper[props.side] === 'horizontal'
-          ? `translate(${props.side === 'left' ? '-100%' : 0}, -50%)`
-          : `translate(-50%, ${props.side === 'top' ? '-100%' : 0})`,
-        [orientationMapper[props.side] === 'horizontal' ? 'left' : 'top']:
-            props.parentElement
-              ? orientationMapper[props.side] === 'horizontal'
-                ? props.side === 'left'
-                  ? props.parentElement.getBoundingClientRect().left - props.distanceFromParent - (props.arrowSize) > 0
-                    ? `${props.parentElement.getBoundingClientRect().left - props.distanceFromParent - (props.arrowSize)}px`
-                    : 0
-                  : props.parentElement.getBoundingClientRect().right + props.distanceFromParent + (props.arrowSize) > 0
-                    ? `${props.parentElement.getBoundingClientRect().right + props.distanceFromParent + (props.arrowSize)}px`
-                    : 0
-                : props.side === 'top'
-                  ? props.parentElement.getBoundingClientRect().top - props.distanceFromParent - props.arrowSize > 0
-                    ? `${props.parentElement.getBoundingClientRect().top - props.distanceFromParent - props.arrowSize}px`
-                    : 0
-                  : props.parentElement.getBoundingClientRect().bottom + props.distanceFromParent + (props.arrowSize) > 0
-                    ? `${props.parentElement.getBoundingClientRect().bottom + props.distanceFromParent + (props.arrowSize)}px`
-                    : 0
-              : 0,
-        
-      }}
-      onMouseEnter={props.onMouseEnter}
-      onMouseLeave={props.onMouseLeave}
-    >
-      {props.children}
-      <div
-        id="callout-after"
-        className="callout-after"
-        style={{
-          borderWidth: `${props.arrowSize}px`,
-          borderStyle: 'solid',
-          borderColor: calculateBorderColor(props.side, props.color),
-          [oppositeMapper[props.side]]: 0 - (4 * (props.arrowSize / 2)),
-          [orientationMapper[props.side] === 'horizontal' ? 'top' : 'left']: 
-            orientationMapper[props.side] === 'horizontal' 
-              ? props.parentElement.getBoundingClientRect().top + (props.parentElement.clientHeight / 2) - (props.size.height / 2) > 0
-                ? '50%'
-                : props.parentElement.getBoundingClientRect().top + (props.parentElement.clientHeight / 2)
-              : props.parentElement.getBoundingClientRect().left + (props.parentElement.clientWidth / 2) - (props.size.width / 2) > 0
-                ? '50%'
-                : props.parentElement.getBoundingClientRect().left + (props.parentElement.clientWidth / 2),
-          [orientationMapper[props.side] === 'horizontal' ? 'marginTop' : 'marginLeft']: - props.arrowSize,
-        }}
-      />
-    </div>
-  </Portal>
-);
+class Callout extends Component {
+  constructor(props) {
+    super(props);
+    this.handleClick = this.handleClick.bind(this);
+  }
+
+  componentDidMount() {
+    document.addEventListener('mousedown', this.handleClick, false);
+  }
+
+  componentWillUnmount() {
+    document.removeEventListener('mousedown', this.handleClick, false);
+  }
+  
+  handleClick(event) {
+    if (this.node.contains(event.target)) {
+      console.log('called');
+      return;
+    }
+    if (this.props.onClickOutside) this.props.onClickOutside();
+  }
+
+  render() {
+    return (
+      <Portal>
+        <div
+          id="callout"
+          ref={node => this.node = node}
+          className={`callout ${this.props.className || ''}`}
+          style={{
+            display: this.props.isVisible ? 'block' : 'none',
+            backgroundColor: this.props.color || 'rgba(0, 0, 0, 0.7)',
+            [orientationMapper[this.props.side] === 'horizontal' ? 'top' : 'left']:
+              this.props.parentElement
+                ? orientationMapper[this.props.side] === 'horizontal'
+                  ? this.props.parentElement.getBoundingClientRect().top + (this.props.parentElement.clientHeight / 2) - (this.props.size.height / 2) > 0
+                    ? `${this.props.parentElement.getBoundingClientRect().top + (this.props.parentElement.clientHeight / 2)}px`
+                    : `${(this.props.size.height / 2) + 2}px`
+                  : this.props.parentElement.getBoundingClientRect().left + (this.props.parentElement.clientWidth / 2) - (this.props.size.width / 2) > 0
+                    ? `${this.props.parentElement.getBoundingClientRect().left + (this.props.parentElement.clientWidth / 2)}px`
+                    : `${(this.props.size.width / 2) + 2}px`
+                : 0,
+            transform: orientationMapper[this.props.side] === 'horizontal'
+              ? `translate(${this.props.side === 'left' ? '-100%' : 0}, -50%)`
+              : `translate(-50%, ${this.props.side === 'top' ? '-100%' : 0})`,
+            [orientationMapper[this.props.side] === 'horizontal' ? 'left' : 'top']:
+                this.props.parentElement
+                  ? orientationMapper[this.props.side] === 'horizontal'
+                    ? this.props.side === 'left'
+                      ? this.props.parentElement.getBoundingClientRect().left - this.props.distanceFromParent - (this.props.arrowSize) > 0
+                        ? `${this.props.parentElement.getBoundingClientRect().left - this.props.distanceFromParent - (this.props.arrowSize)}px`
+                        : 0
+                      : this.props.parentElement.getBoundingClientRect().right + this.props.distanceFromParent + (this.props.arrowSize) > 0
+                        ? `${this.props.parentElement.getBoundingClientRect().right + this.props.distanceFromParent + (this.props.arrowSize)}px`
+                        : 0
+                    : this.props.side === 'top'
+                      ? this.props.parentElement.getBoundingClientRect().top - this.props.distanceFromParent - this.props.arrowSize > 0
+                        ? `${this.props.parentElement.getBoundingClientRect().top - this.props.distanceFromParent - this.props.arrowSize}px`
+                        : 0
+                      : this.props.parentElement.getBoundingClientRect().bottom + this.props.distanceFromParent + (this.props.arrowSize) > 0
+                        ? `${this.props.parentElement.getBoundingClientRect().bottom + this.props.distanceFromParent + (this.props.arrowSize)}px`
+                        : 0
+                  : 0,
+            
+          }}
+          onMouseEnter={this.props.onMouseEnter}
+          onMouseLeave={this.props.onMouseLeave}
+        >
+          {this.props.children}
+          <div
+            id="callout-after"
+            className="callout-after"
+            style={{
+              borderWidth: `${this.props.arrowSize}px`,
+              borderStyle: 'solid',
+              borderColor: calculateBorderColor(this.props.side, this.props.color),
+              [oppositeMapper[this.props.side]]: 0 - (4 * (this.props.arrowSize / 2)),
+              [orientationMapper[this.props.side] === 'horizontal' ? 'top' : 'left']: 
+                orientationMapper[this.props.side] === 'horizontal' 
+                  ? this.props.parentElement.getBoundingClientRect().top + (this.props.parentElement.clientHeight / 2) - (this.props.size.height / 2) > 0
+                    ? '50%'
+                    : this.props.parentElement.getBoundingClientRect().top + (this.props.parentElement.clientHeight / 2)
+                  : this.props.parentElement.getBoundingClientRect().left + (this.props.parentElement.clientWidth / 2) - (this.props.size.width / 2) > 0
+                    ? '50%'
+                    : this.props.parentElement.getBoundingClientRect().left + (this.props.parentElement.clientWidth / 2),
+              [orientationMapper[this.props.side] === 'horizontal' ? 'marginTop' : 'marginLeft']: - this.props.arrowSize,
+            }}
+          />
+        </div>
+      </Portal>
+    );
+  }
+}
 
 Callout.propTypes = {
   side: PropTypes.oneOf(['top', 'right', 'bottom', 'left']),
@@ -113,5 +138,4 @@ Callout.defaultProps = {
   isVisible: false,
 }
 
-export default sizeMe()(onClickOutside(Callout));
-// one more prop exposed: handleClickOutside due to onClickOutside
+export default sizeMe()(Callout);
