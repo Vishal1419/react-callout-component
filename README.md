@@ -178,6 +178,69 @@ export default App;
 
 ```
 
+## Show callout only when parent element is clicked and hide it on click outside
+
+```jsx
+import React, { Component } from 'react';
+import Callout from 'react-callout-component';
+import 'react-callout-component/dist/main.css';
+
+class App extends Component {
+  constructor() {
+    super();
+    this.state = {
+      box: null,
+      isBoxHovered: false,
+    };
+    this.boxEl = React.createRef();
+    this.onBoxClick = this.onBoxClick.bind(this);
+    this.onBoxClickOutside = this.onBoxClickOutside.bind(this);
+  }
+
+  componentDidMount() {
+    this.setState({
+      box: this.boxEl.current,
+    });
+  }
+
+  onBoxClick() {
+    this.setState({
+      isBoxHovered: true,
+    });
+  }
+
+  onBoxClickOutside() {
+    this.setState({
+      isBoxHovered: false,
+    });
+  }
+
+  render() {
+    return (
+      <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: 500 }}>
+        <div
+          ref={this.boxEl}
+          style={{ backgroundColor: 'purple', height: 100, width: 100 }}
+          role="presentation"
+          onClick={this.onBoxClick}
+          onKeyDown={() => {}}
+        />
+        <Callout
+          isVisible={this.state.isBoxHovered}
+          parentElement={this.state.box}
+          onClickOutside={this.onBoxClickOutside}
+        >
+          <span style={{ color: 'white' }}>This is a box</span>
+        </Callout>
+      </div>
+    );
+  }
+}
+
+export default App;
+
+```
+
 ## callout props
 
 | prop              | Possible values                 | default value       | required?|
@@ -191,3 +254,4 @@ export default App;
 |arrowSize          |number from 0 to +∞              |10                   |no        |
 |onMouseEnter       |function                         |() => {}             |no        |
 |onMouseLeave       |function                         |() => {}             |no        |
+|onClickOutside     |function                         |() => {}             |no        |
