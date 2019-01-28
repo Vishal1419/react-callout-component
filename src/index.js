@@ -40,7 +40,7 @@ class Callout extends Component {
   componentWillUnmount() {
     document.removeEventListener('mousedown', this.handleClick, false);
   }
-  
+
   handleClick(event) {
     if (this.node.contains(event.target)) {
       console.log('called');
@@ -53,8 +53,8 @@ class Callout extends Component {
     return (
       <Portal>
         <div
-          id="callout"
-          ref={node => this.node = node}
+          id='callout'
+          ref={node => { this.node = node; }}
           className={`callout ${this.props.className || ''}`}
           style={{
             display: this.props.isVisible ? 'block' : 'none',
@@ -90,29 +90,28 @@ class Callout extends Component {
                         ? `${this.props.parentElement.getBoundingClientRect().bottom + this.props.distanceFromParent + (this.props.arrowSize)}px`
                         : 0
                   : 0,
-            
           }}
           onMouseEnter={this.props.onMouseEnter}
           onMouseLeave={this.props.onMouseLeave}
         >
           {this.props.children}
           <div
-            id="callout-after"
-            className="callout-after"
+            id='callout-after'
+            className='callout-after'
             style={{
               borderWidth: `${this.props.arrowSize}px`,
               borderStyle: 'solid',
               borderColor: calculateBorderColor(this.props.side, this.props.color),
               [oppositeMapper[this.props.side]]: 0 - (4 * (this.props.arrowSize / 2)),
-              [orientationMapper[this.props.side] === 'horizontal' ? 'top' : 'left']: 
-                orientationMapper[this.props.side] === 'horizontal' 
+              [orientationMapper[this.props.side] === 'horizontal' ? 'top' : 'left']:
+                orientationMapper[this.props.side] === 'horizontal'
                   ? this.props.parentElement.getBoundingClientRect().top + (this.props.parentElement.clientHeight / 2) - (this.props.size.height / 2) > 0
                     ? '50%'
                     : this.props.parentElement.getBoundingClientRect().top + (this.props.parentElement.clientHeight / 2)
                   : this.props.parentElement.getBoundingClientRect().left + (this.props.parentElement.clientWidth / 2) - (this.props.size.width / 2) > 0
                     ? '50%'
                     : this.props.parentElement.getBoundingClientRect().left + (this.props.parentElement.clientWidth / 2),
-              [orientationMapper[this.props.side] === 'horizontal' ? 'marginTop' : 'marginLeft']: - this.props.arrowSize,
+              [orientationMapper[this.props.side] === 'horizontal' ? 'marginTop' : 'marginLeft']: -this.props.arrowSize,
             }}
           />
         </div>
@@ -128,6 +127,12 @@ Callout.propTypes = {
   distanceFromParent: PropTypes.number,
   className: PropTypes.string,
   isVisible: PropTypes.bool,
+  onClickOutside: PropTypes.func,
+  onMouseEnter: PropTypes.func,
+  onMouseLeave: PropTypes.func,
+  color: PropTypes.string,
+  size: PropTypes.objectOf(PropTypes.any),
+  children: PropTypes.oneOfType([PropTypes.element, PropTypes.arrayOf(PropTypes.element)]),
 }
 
 Callout.defaultProps = {
@@ -136,6 +141,12 @@ Callout.defaultProps = {
   distanceFromParent: 0,
   className: '',
   isVisible: false,
+  onClickOutside: () => {},
+  onMouseEnter: () => {},
+  onMouseLeave: () => {},
+  color: '',
+  size: {},
+  children: <div />,
 }
 
 export default sizeMe()(Callout);
