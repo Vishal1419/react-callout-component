@@ -1,0 +1,8 @@
+{
+  "short_name": "react-callout-component",
+  "name": "react-callout-component",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "theme_color": "#000000",
+  "background_color": "#ffffff"
+}
