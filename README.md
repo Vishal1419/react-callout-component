@@ -8,12 +8,31 @@
 
 ## Basic Usage
 
-You need to make a change to two files:
+You need to make a change to three files:
 
 > index.html
 
 ```html
 <div id="portal"></div> <!-- add this line after div with id root -->
+```
+
+> include styles in your project:
+
+```css
+.callout {
+  border-radius: 4px;
+  position: absolute;
+  padding: 8px;
+  cursor: pointer;
+  z-index: 9999;
+}
+
+.callout-after {
+  height: 0;
+  width: 0;
+  position: absolute;
+  cursor: pointer;
+}
 ```
 
 > any of your component where you want to show callout
