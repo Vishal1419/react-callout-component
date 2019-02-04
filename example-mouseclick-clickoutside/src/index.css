@@ -12,11 +12,20 @@
   position: absolute;
   cursor: pointer;
 }
-/* 
-.arrow {
+
+/* .arrow {
   position: absolute;
   width: 3em;
   height: 3em;
+}
+
+.arrow::before {
+  content: '';
+  margin: auto;
+  display: block;
+  width: 0;
+  height: 0;
+  border-style: solid;
 }
 
 [data-placement*='bottom'].arrow {
@@ -63,13 +72,4 @@
 [data-placement*='left'].arrow::before {
   border-width: 1.5em 0 1.5em 1em;
   border-color: transparent transparent transparent#232323;
-}
-
-.arrow::before {
-  content: '';
-  margin: auto;
-  display: block;
-  width: 0;
-  height: 0;
-  border-style: solid;
 } */

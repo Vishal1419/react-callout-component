@@ -1,152 +1,198 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-import sizeMe from 'react-sizeme';
+// import SizeMe from 'react-sizeme';
 
 import './main.css';
 import Portal from './Portal';
+import Arrow from './Arrow';
+import { orientationMapper, oppositeOrientationMapper } from './utils/orientation';
+import { noop, getScrollParent, getBoundingClientRect } from './utils';
 
-const sides = ['top', 'right', 'bottom', 'left'];
+const calculateCalloutCrossAxisPosition = (callout, side, parentElement, scrollingElement) => {
+  const calculateCalloutPosition = (grandParentLength, scrollLength, parentPositionLowerLimit, parentLength, calloutLength) => {
+    const isCroppedFromLowerLimit = parentPositionLowerLimit + scrollLength + (parentLength / 2) - (calloutLength / 2) < scrollLength;
+    const isCroppedFromUpperLimit = parentPositionLowerLimit + scrollLength + (parentLength / 2) + (calloutLength / 2) > grandParentLength + scrollLength;
+    if (isCroppedFromLowerLimit) {
+      return scrollLength + 2;
+    } else if (isCroppedFromUpperLimit) {
+      return grandParentLength - calloutLength + scrollLength - 2;
+    } else {
+      return parentPositionLowerLimit + scrollLength + (parentLength / 2) - (calloutLength / 2);
+    }
+  }
 
-const orientationMapper = {
-  top: 'vertical',
-  right: 'horizontal',
-  bottom: 'vertical',
-  left: 'horizontal',
-}
+  const orientation = orientationMapper[side];
+  const { innerHeight: windowHeight, innerWidth: windowWidth } = window;
+  const { top: parentTop = 0, left: parentLeft = 0 } = getBoundingClientRect(parentElement) || {};
+  const { clientWidth: parentWidth = 0, clientHeight: parentHeight = 0 } = parentElement || {};
+  const { scrollX = 0, scrollY = 0 } = scrollingElement || {};
+  // const { offsetWidth: calloutWidth = 0, offsetHeight: calloutHeight = 0 } = callout || {};
+  console.log(callout, 'callout');
+  const abc = getBoundingClientRect(callout) || {};
 
-const oppositeMapper = {
-  top: 'bottom',
-  right: 'left',
-  bottom: 'top',
-  left: 'right',
-}
+  console.log(abc);
+  const { width: calloutWidth = 0, height: calloutHeight = 0 } = abc;
 
-const calculateBorderColor = (position, color) => {
-  const borderColors = sides.map(side =>
-    side === position ? color || 'rgba(0, 0, 0, 0.7)' : 'transparent');
-  return borderColors.join(' ');
+  if (parentElement) {
+    if (orientation === 'horizontal') {
+      return calculateCalloutPosition(windowHeight, scrollY, parentTop, parentHeight, calloutHeight);
+    } else {
+      return calculateCalloutPosition(windowWidth, scrollX, parentLeft, parentWidth, calloutWidth);
+    }
+  } else {
+    return 0;
+  }
+};
+
+const calculateCalloutMainAxisPosition = (callout, side, parentElement, distanceFromParent, arrowSize) => {
+  const { top: parentTop = 0, left: parentLeft = 0, right: parentRight = 0, bottom: parentBottom = 0 } = getBoundingClientRect(parentElement) || {};
+  // const { offsetWidth: calloutWidth = 0, offsetHeight: calloutHeight = 0 } = callout || {};
+  const { width: calloutWidth = 0, height: calloutHeight = 0 } = getBoundingClientRect(callout) || {};
+
+  switch (side) {
+    case 'left':
+    case 'top': {
+      const parentLength = side === 'left' ? parentLeft : parentTop;
+      const calloutLength = side === 'left' ? calloutWidth : calloutHeight;
+      return parentLength - distanceFromParent - arrowSize > 0 ? parentLength - distanceFromParent - arrowSize - calloutLength : 0
+    }
+    case 'right':
+    case 'bottom': {
+      const parentLength = side === 'right' ? parentRight : parentBottom;
+      return parentLength + distanceFromParent + arrowSize > 0 ? parentLength + distanceFromParent + arrowSize : 0
+    }
+    default:
+      return 0;
+  }
 }
 
 class Callout extends Component {
   constructor(props) {
     super(props);
+    this.state = {
+      scrollingElement: null,
+      shouldRerender: false,
+    };
+    this.node = React.createRef();
     this.handleClick = this.handleClick.bind(this);
+    this.handleScroll = this.handleScroll.bind(this);
+    this.handleResize = this.handleResize.bind(this);
+  }
+
+  componentDidUpdate() {
+    const { height: calloutHeight = 0 } = getBoundingClientRect(this.node.current);
+    console.log(calloutHeight, 'did component update');
+    if (calloutHeight > 0 && this.state.shouldRerender) {
+      this.setState({ shouldRerender: false });
+    } else if (calloutHeight === 0 && !this.state.shouldRerender) {
+      this.setState({ shouldRerender: true });
+    }
   }
 
   componentDidMount() {
+    const { side, parentElement } = this.props;
+    const orientation = orientationMapper[side];
+    const oppositeOrientation = oppositeOrientationMapper[orientation];
+    this.setState({
+      scrollingElement: getScrollParent(parentElement, oppositeOrientation) || window,
+    }, () => {
+      const { scrollingElement } = this.state;
+      scrollingElement.addEventListener('scroll', this.handleScroll, true);
+    });
     document.addEventListener('mousedown', this.handleClick, false);
+    window.addEventListener('resize', this.handleResize);
   }
 
   componentWillUnmount() {
+    const { scrollingElement } = this.state;
     document.removeEventListener('mousedown', this.handleClick, false);
+    scrollingElement.removeEventListener('scroll', this.handleScroll, false);
+    window.removeEventListener('resize', this.handleResize);
   }
 
   handleClick(event) {
-    if (this.node.contains(event.target)) {
-      console.log('called');
-      return;
+    if (this.node && this.node.current) {
+      if (this.node.current.contains(event.target)) {
+        return;
+      }
+      const { onClickOutside } = this.props;
+      if (onClickOutside) onClickOutside();
     }
-    if (this.props.onClickOutside) this.props.onClickOutside();
+  }
+
+  handleScroll() {
+    this.forceUpdate();
+  }
+
+  handleResize() {
+    this.forceUpdate();
   }
 
   render() {
+    const { parentElement, side, distanceFromParent, arrowSize, color, className, isVisible, onMouseEnter, onMouseLeave, children } = this.props;
+    const { scrollingElement } = this.state;
+    const orientation = orientationMapper[side];
+    // const currentNode = this.node && this.node.current;
+    // console.log(currentNode, 'currentNode');
     return (
-      <Portal>
-        <div
-          id='callout'
-          ref={node => { this.node = node; }}
-          className={`callout ${this.props.className || ''}`}
-          style={{
-            display: this.props.isVisible ? 'block' : 'none',
-            backgroundColor: this.props.color || 'rgba(0, 0, 0, 0.7)',
-            [orientationMapper[this.props.side] === 'horizontal' ? 'top' : 'left']:
-              this.props.parentElement
-                ? orientationMapper[this.props.side] === 'horizontal'
-                  ? this.props.parentElement.getBoundingClientRect().top + (this.props.parentElement.clientHeight / 2) - (this.props.size.height / 2) > 0
-                    ? `${this.props.parentElement.getBoundingClientRect().top + (this.props.parentElement.clientHeight / 2)}px`
-                    : `${(this.props.size.height / 2) + 2}px`
-                  : this.props.parentElement.getBoundingClientRect().left + (this.props.parentElement.clientWidth / 2) - (this.props.size.width / 2) > 0
-                    ? `${this.props.parentElement.getBoundingClientRect().left + (this.props.parentElement.clientWidth / 2)}px`
-                    : `${(this.props.size.width / 2) + 2}px`
-                : 0,
-            transform: orientationMapper[this.props.side] === 'horizontal'
-              ? `translate(${this.props.side === 'left' ? '-100%' : 0}, -50%)`
-              : `translate(-50%, ${this.props.side === 'top' ? '-100%' : 0})`,
-            [orientationMapper[this.props.side] === 'horizontal' ? 'left' : 'top']:
-                this.props.parentElement
-                  ? orientationMapper[this.props.side] === 'horizontal'
-                    ? this.props.side === 'left'
-                      ? this.props.parentElement.getBoundingClientRect().left - this.props.distanceFromParent - (this.props.arrowSize) > 0
-                        ? `${this.props.parentElement.getBoundingClientRect().left - this.props.distanceFromParent - (this.props.arrowSize)}px`
-                        : 0
-                      : this.props.parentElement.getBoundingClientRect().right + this.props.distanceFromParent + (this.props.arrowSize) > 0
-                        ? `${this.props.parentElement.getBoundingClientRect().right + this.props.distanceFromParent + (this.props.arrowSize)}px`
-                        : 0
-                    : this.props.side === 'top'
-                      ? this.props.parentElement.getBoundingClientRect().top - this.props.distanceFromParent - this.props.arrowSize > 0
-                        ? `${this.props.parentElement.getBoundingClientRect().top - this.props.distanceFromParent - this.props.arrowSize}px`
-                        : 0
-                      : this.props.parentElement.getBoundingClientRect().bottom + this.props.distanceFromParent + (this.props.arrowSize) > 0
-                        ? `${this.props.parentElement.getBoundingClientRect().bottom + this.props.distanceFromParent + (this.props.arrowSize)}px`
-                        : 0
-                  : 0,
-          }}
-          onMouseEnter={this.props.onMouseEnter}
-          onMouseLeave={this.props.onMouseLeave}
-        >
-          {this.props.children}
-          <div
-            id='callout-after'
-            className='callout-after'
-            style={{
-              borderWidth: `${this.props.arrowSize}px`,
-              borderStyle: 'solid',
-              borderColor: calculateBorderColor(this.props.side, this.props.color),
-              [oppositeMapper[this.props.side]]: 0 - (4 * (this.props.arrowSize / 2)),
-              [orientationMapper[this.props.side] === 'horizontal' ? 'top' : 'left']:
-                orientationMapper[this.props.side] === 'horizontal'
-                  ? this.props.parentElement.getBoundingClientRect().top + (this.props.parentElement.clientHeight / 2) - (this.props.size.height / 2) > 0
-                    ? '50%'
-                    : this.props.parentElement.getBoundingClientRect().top + (this.props.parentElement.clientHeight / 2)
-                  : this.props.parentElement.getBoundingClientRect().left + (this.props.parentElement.clientWidth / 2) - (this.props.size.width / 2) > 0
-                    ? '50%'
-                    : this.props.parentElement.getBoundingClientRect().left + (this.props.parentElement.clientWidth / 2),
-              [orientationMapper[this.props.side] === 'horizontal' ? 'marginTop' : 'marginLeft']: -this.props.arrowSize,
-            }}
-          />
-        </div>
-      </Portal>
+      isVisible
+        ? (
+          <Portal>
+            <div
+              id="callout"
+              ref={this.node}
+              className={`callout ${className || ''}`}
+              style={{
+                display: isVisible ? 'block' : 'none',
+                backgroundColor: color || 'rgba(0, 0, 0, 0.7)',
+                [orientation === 'horizontal' ? 'left' : 'top']: calculateCalloutMainAxisPosition(this.node && this.node.current, side, parentElement, distanceFromParent, arrowSize),
+                [orientation === 'horizontal' ? 'top' : 'left']: calculateCalloutCrossAxisPosition(this.node && this.node.current, side, parentElement, scrollingElement),
+              }}
+              onMouseEnter={onMouseEnter}
+              onMouseLeave={onMouseLeave}
+            >
+              {children}
+              <Arrow
+                callout={this.node && this.node.current}
+                side={side}
+                color={color}
+                arrowSize={arrowSize}
+                parentElement={parentElement}
+                scrollingElement={scrollingElement}
+              />
+            </div>
+          </Portal>
+        )
+        : null
     );
   }
 }
 
 Callout.propTypes = {
-  side: PropTypes.oneOf(['top', 'right', 'bottom', 'left']),
-  arrowSize: PropTypes.number,
   parentElement: PropTypes.objectOf(PropTypes.any).isRequired,
+  side: PropTypes.oneOf(['top', 'right', 'bottom', 'left']),
   distanceFromParent: PropTypes.number,
+  arrowSize: PropTypes.number,
+  color: PropTypes.string,
   className: PropTypes.string,
   isVisible: PropTypes.bool,
   onClickOutside: PropTypes.func,
   onMouseEnter: PropTypes.func,
   onMouseLeave: PropTypes.func,
-  color: PropTypes.string,
-  size: PropTypes.objectOf(PropTypes.any),
   children: PropTypes.oneOfType([PropTypes.element, PropTypes.arrayOf(PropTypes.element)]),
 }
 
 Callout.defaultProps = {
   side: 'left',
-  arrowSize: 10,
   distanceFromParent: 0,
+  arrowSize: 10,
+  color: '',
   className: '',
   isVisible: false,
-  onClickOutside: () => {},
-  onMouseEnter: () => {},
-  onMouseLeave: () => {},
-  color: '',
-  size: {},
+  onClickOutside: noop,
+  onMouseEnter: noop,
+  onMouseLeave: noop,
   children: <div />,
 }
 
-export default sizeMe()(Callout);
+export default Callout;

@@ -58,7 +58,5 @@
   "files": [
     "dist"
   ],
-  "dependencies": {
-    "react-sizeme": "^2.5.2"
-  }
+  "dependencies": {}
 }

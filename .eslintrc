@@ -14,9 +14,9 @@
     "sourceType": "module"
   },
   "rules": {
-    "space-before-function-paren": 0,
-    "react/jsx-boolean-value": 0,
     "comma-dangle": 0,
-    "semi": 0
+    "semi": 0,
+    "space-before-function-paren": 0,
+    "jsx-quotes": 0
   }
 }
