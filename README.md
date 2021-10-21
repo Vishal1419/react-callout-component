@@ -1,3 +1,5 @@
+# This package is deprecated. Please do not use it.
+
 ## How does callout look?
 
 ![callout image](docImages/Screen%20Shot%202018-08-09%20at%201.11.43%20AM.png)
